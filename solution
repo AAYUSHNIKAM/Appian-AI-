@@ -1,0 +1,90 @@
+entity Student {
+  attributes: {
+    studentID: Integer,
+    firstName: String,
+    lastName: String,
+    enrollmentDate: Date,
+  }
+}
+
+entity Course {
+  attributes: {
+    courseID: Integer,
+    courseName: String,
+    credits: Integer,
+  }
+}
+
+interface StudentPortal {
+  page StudentDashboard {
+    components: {
+      charts: {
+        enrollmentHistory: LineChart,
+        gradesOverview: BarChart,
+      },
+      notifications: NotificationPanel,
+    }
+    actions: {
+      enrollInCourse: Button,
+      viewGrades: Button,
+    }
+  }
+
+  page CourseEnrollment {
+    components: {
+      availableCourses: Table,
+      enrolledCourses: Table,
+    }
+    actions: {
+      enroll: Button,
+      withdraw: Button,
+    }
+  }
+  
+  page AIRecommendations {
+    components: {
+      recommendedCourses: Table,
+    }
+    actions: {
+      acceptRecommendation: Button,
+      rejectRecommendation: Button,
+    }
+  }
+}
+
+process StudentEnrollmentProcess {
+  tasks: {
+    initiateEnrollment: StartEvent,
+    selectCourses: UserTask(CourseEnrollment),
+    confirmEnrollment: UserTask(StudentDashboard),
+  }
+  integrations: {
+    integrateWithUniversityDatabase: ServiceTask,
+  }
+  businessRules: {
+    checkPrerequisites: DecisionTask,
+  }
+}
+
+process AIRecommendationProcess {
+  tasks: {
+    generateRecommendations: ServiceTask,
+    presentRecommendations: UserTask(AIRecommendations),
+  }
+  integrations: {
+    integrateWithAIEngine: ServiceTask,
+  }
+}
+
+security: {
+  roles: {
+    student: Role,
+    faculty: Role,
+    administrator: Role,
+  }
+  accessRules: {
+    studentPortalAccess: {
+      allow: [student, faculty, administrator],
+    }
+  }
+}
